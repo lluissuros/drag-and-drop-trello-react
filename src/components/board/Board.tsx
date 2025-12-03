@@ -37,6 +37,8 @@ const Board = ({
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("board", board);
+
   const findColumnByCardId = (cardId: string) =>
     board.columns.find((column) =>
       column.cards.some((card) => card.id === cardId)
@@ -116,6 +118,7 @@ const Board = ({
   const activeCard = activeCardId ? findCardById(activeCardId) : undefined;
 
   useEffect(() => {
+    //testApiRef is used for testing the board
     if (!testApiRef) return;
     testApiRef.current = {
       moveCard: (cardId: string, columnId: ColumnId) => {
