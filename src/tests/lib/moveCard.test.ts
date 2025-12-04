@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { moveCard, ErrorReasons } from "../../domain/services/moveCard";
-import {
-  COLUMN_LABELS,
-  COLUMN_ORDER,
-  ColumnId,
-} from "../../domain/types/Column";
-import { Card } from "../../domain/types/Card";
+import { moveCard, ErrorReasons } from "../../lib/services/moveCard";
+import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
+import { Card } from "../../lib/types/Card";
 
 const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({

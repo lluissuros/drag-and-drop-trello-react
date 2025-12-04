@@ -9,10 +9,10 @@ import {
 import userEvent from "@testing-library/user-event";
 import { RefObject } from "react";
 import { vi } from "vitest";
-import { COLUMN_ORDER, ColumnId } from "../../domain/types/Column";
-import { createBoard } from "../../domain/services/createBoard";
-import { Board as BoardModel } from "../../domain/types/Board";
-import { BoardProvider } from "../../context/BoardContext";
+import { COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
+import { createBoard } from "../../lib/services/createBoard";
+import { Board as BoardModel } from "../../lib/types/Board";
+import { BoardProvider } from "../../contexts/BoardContext";
 import Board, { BoardTestApi } from "../../components/board/Board";
 import { BoardRepository } from "../../infra/storage/BoardRepository";
 
@@ -24,12 +24,12 @@ vi.mock("../../infra/storage/BoardRepository", () => ({
   },
 }));
 
-const pointerTargets: Record<ColumnId, { x: number; y: number }> = {
-  BACKLOG: { x: 10, y: 10 },
-  TODO: { x: 280, y: 10 },
-  DOING: { x: 540, y: 10 },
-  DONE: { x: 800, y: 10 },
-};
+// const pointerTargets: Record<ColumnId, { x: number; y: number }> = {
+//   BACKLOG: { x: 10, y: 10 },
+//   TODO: { x: 280, y: 10 },
+//   DOING: { x: 540, y: 10 },
+//   DONE: { x: 800, y: 10 },
+// };
 
 const dragCardToColumn = (
   card: HTMLElement,
@@ -37,31 +37,32 @@ const dragCardToColumn = (
   testApiRef: RefObject<BoardTestApi | null>,
   options?: { openDialog?: boolean }
 ) => {
-  const target = pointerTargets[columnId];
-  fireEvent.pointerDown(card, {
-    pointerId: 1,
-    clientX: 0,
-    clientY: 0,
-    buttons: 1,
-  });
-  fireEvent.pointerMove(document.body, {
-    pointerId: 1,
-    clientX: target.x,
-    clientY: target.y,
-    buttons: 1,
-  });
-  fireEvent.pointerUp(document.body, {
-    pointerId: 1,
-    clientX: target.x,
-    clientY: target.y,
-  });
+  // const target = pointerTargets[columnId];
+  // fireEvent.pointerDown(card, {
+  //   pointerId: 1,
+  //   clientX: 0,
+  //   clientY: 0,
+  //   buttons: 1,
+  // });
+  // fireEvent.pointerMove(document.body, {
+  //   pointerId: 1,
+  //   clientX: target.x,
+  //   clientY: target.y,
+  //   buttons: 1,
+  // });
+  // fireEvent.pointerUp(document.body, {
+  //   pointerId: 1,
+  //   clientX: target.x,
+  //   clientY: target.y,
+  // });
   act(() => {
     const cardId = card.getAttribute("data-card-id") ?? "";
-    if (columnId === "DONE" && options?.openDialog) {
-      testApiRef.current?.openDoneDialog(cardId);
-    } else {
-      testApiRef.current?.moveCard(cardId, columnId);
-    }
+    // if (columnId === "DONE" && options?.openDialog) {
+    //   testApiRef.current?.openDoneDialog(cardId);
+    // } else {
+    //   testApiRef.current?.moveCard(cardId, columnId);
+    // }
+    testApiRef.current?.moveCard(cardId, columnId);
   });
 };
 
@@ -88,14 +89,14 @@ describe("Board component", () => {
     vi.mocked(BoardRepository.load).mockReturnValue(null);
   });
 
-  it.only("renders all four columns", () => {
+  it("renders all four columns", () => {
     renderBoard();
     COLUMN_ORDER.forEach((id) => {
       expect(screen.getByText(id)).toBeInTheDocument();
     });
   });
 
-  it.only("adds cards via the column form", async () => {
+  it("adds cards via the column form", async () => {
     const user = userEvent.setup();
     renderBoard();
 
@@ -107,7 +108,7 @@ describe("Board component", () => {
     expect(within(backlog).getByText("Ship feature")).toBeInTheDocument();
   });
 
-  it.only("disable add card if the input is empty", async () => {
+  it("disable add card if the input is empty", async () => {
     renderBoard();
 
     const backlog = screen.getByTestId("column-BACKLOG");

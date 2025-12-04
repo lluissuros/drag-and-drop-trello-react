@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Card as CardModel } from "../../domain/types/Card";
-import { ColumnId } from "../../domain/types/Column";
+import { Card as CardModel } from "../../lib/types/Card";
+import { ColumnId } from "../../lib/types/Column";
 import { cn } from "../../lib/utils";
 import { Card, CardContent } from "../ui/card";
 

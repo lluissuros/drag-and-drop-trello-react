@@ -4,7 +4,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { FormEvent, useState } from "react";
-import { Column as ColumnModel, ColumnId } from "../../domain/types/Column";
+import { Column as ColumnModel, ColumnId } from "../../lib/types/Column";
 import {
   Card as CardComponent,
   CardContent,

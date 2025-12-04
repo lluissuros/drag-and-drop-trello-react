@@ -9,8 +9,8 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { RefObject, useEffect, useState } from "react";
-import { Card as CardModel } from "../../domain/types/Card";
-import { COLUMN_ORDER, ColumnId } from "../../domain/types/Column";
+import { Card as CardModel } from "../../lib/types/Card";
+import { COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
 import { useBoard } from "../../hooks/useBoard";
 import ConfirmDoneDialog from "../dialogs/ConfirmDoneDialog";
 import { Card, CardContent } from "../ui/card";

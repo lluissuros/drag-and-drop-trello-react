@@ -22,10 +22,7 @@ export const addCard = (
     return { ok: false, reason: "Column not found" };
   }
 
-  const newCardId =
-    typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `card-${Date.now()}`;
+  const newCardId = crypto.randomUUID();
   const newBoard: Board = {
     columns: board.columns.map((column, index) =>
       index === columnIndex

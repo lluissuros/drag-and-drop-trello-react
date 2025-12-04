@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { validateBoard } from "../../domain/validators";
+import { validateBoard } from "../../lib/validators";
 import {
   Column,
   COLUMN_LABELS,
   COLUMN_ORDER,
   ColumnId,
-} from "../../domain/types/Column";
-import { Card } from "../../domain/types/Card";
+} from "../../lib/types/Column";
+import { Card } from "../../lib/types/Card";
 
 const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({

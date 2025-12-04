@@ -1,5 +1,5 @@
-import { Board } from "../../domain/types/Board";
-import { validateBoard } from "../../domain/validators";
+import { Board } from "../../lib/types/Board";
+import { validateBoard } from "../../lib/validators";
 
 const STORAGE_KEY = "tasks-board";
 

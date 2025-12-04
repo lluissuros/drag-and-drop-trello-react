@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { Board } from "./types/Board";
-import { COLUMN_ORDER, ColumnId } from "./types/Column";
-
-const columnIdSchema = z.enum(COLUMN_ORDER);
+import { COLUMN_ORDER } from "./types/Column";
 
 const cardSchema = z.object({
   id: z.string(),
@@ -10,7 +8,7 @@ const cardSchema = z.object({
 });
 
 const columnSchema = z.object({
-  id: columnIdSchema,
+  id: z.enum(COLUMN_ORDER),
   title: z.string(),
   cards: z.array(cardSchema),
 });
@@ -63,6 +61,3 @@ export const validateBoard = (input: unknown): BoardValidationResult => {
 
   return { ok: true, board: result.data };
 };
-
-export const isColumnId = (value: string): value is ColumnId =>
-  COLUMN_ORDER.includes(value as ColumnId);
