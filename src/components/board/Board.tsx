@@ -2,13 +2,11 @@ import {
   DndContext,
   DragEndEvent,
   DragStartEvent,
-  PointerSensor,
   DragOverlay,
   closestCorners,
-  useSensor,
-  useSensors,
 } from "@dnd-kit/core";
 import { RefObject, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Card as CardModel } from "../../lib/types/Card";
 import { COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
 import { useBoard } from "../../hooks/useBoard";
@@ -16,9 +14,9 @@ import ConfirmDoneDialog from "../dialogs/ConfirmDoneDialog";
 import { Card, CardContent } from "../ui/card";
 import Column from "./Column";
 
+//TODO: review this
 export type BoardTestApi = {
   moveCard: (cardId: string, columnId: ColumnId) => void;
-  openDoneDialog: (cardId: string) => void;
 };
 
 const Board = ({
@@ -27,17 +25,11 @@ const Board = ({
   testApiRef?: RefObject<BoardTestApi | null>;
 }) => {
   const { board, moveCard, addCard } = useBoard();
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 0 } })
-  );
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [pendingDone, setPendingDone] = useState<{
     cardId: string;
     targetColumnId: ColumnId;
   } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  console.log("board", board);
 
   const findColumnByCardId = (cardId: string) =>
     board.columns.find((column) =>
@@ -53,7 +45,6 @@ const Board = ({
   };
 
   const handleDragStart = (event: DragStartEvent) => {
-    setError(null);
     setActiveCardId(event.active.id as string);
   };
 
@@ -91,7 +82,9 @@ const Board = ({
     }
 
     const result = moveCard(activeId, targetColumnId);
-    setError(result.ok ? null : result.reason);
+    if (!result.ok) {
+      toast.error(result.reason);
+    }
   };
 
   const handleDragCancel = () => {
@@ -100,14 +93,18 @@ const Board = ({
 
   const handleAddCard = (columnId: ColumnId, text: string) => {
     const result = addCard(columnId, text);
-    setError(result.ok ? null : result.reason);
+    if (!result.ok) {
+      toast.error(result.reason);
+    }
     return result.ok;
   };
 
   const confirmDoneMove = () => {
     if (!pendingDone) return;
     const result = moveCard(pendingDone.cardId, pendingDone.targetColumnId);
-    setError(result.ok ? null : result.reason);
+    if (!result.ok) {
+      toast.error(result.reason);
+    }
     setPendingDone(null);
   };
 
@@ -123,10 +120,9 @@ const Board = ({
     testApiRef.current = {
       moveCard: (cardId: string, columnId: ColumnId) => {
         const result = moveCard(cardId, columnId);
-        setError(result.ok ? null : result.reason);
-      },
-      openDoneDialog: (cardId: string) => {
-        setPendingDone({ cardId, targetColumnId: "DONE" });
+        if (!result.ok) {
+          toast.error(result.reason);
+        }
       },
     };
 
@@ -137,9 +133,7 @@ const Board = ({
 
   return (
     <div className="space-y-4">
-      {error && <div className="text-sm text-rose-600">{error}</div>}
       <DndContext
-        sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
