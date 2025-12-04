@@ -1,15 +1,15 @@
 import { Board } from "../types/Board";
 import { ColumnId } from "../types/Column";
 
-export type AddCardResult =
+export type addTaskResult =
   | { ok: true; board: Board }
   | { ok: false; reason: string };
 
-export const addCard = (
+export const addTask = (
   board: Board,
   columnId: ColumnId,
   text: string
-): AddCardResult => {
+): addTaskResult => {
   const trimmed = text.trim();
   if (!trimmed) {
     return { ok: false, reason: "Card text cannot be empty" };

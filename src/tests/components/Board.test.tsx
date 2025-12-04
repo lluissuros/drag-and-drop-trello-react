@@ -60,9 +60,9 @@ const dragCardToColumn = (
     // if (columnId === "DONE" && options?.openDialog) {
     //   testApiRef.current?.openDoneDialog(cardId);
     // } else {
-    //   testApiRef.current?.moveCard(cardId, columnId);
+    //   testApiRef.current?.moveTask(cardId, columnId);
     // }
-    testApiRef.current?.moveCard(cardId, columnId);
+    testApiRef.current?.moveTask(cardId, columnId);
   });
 };
 

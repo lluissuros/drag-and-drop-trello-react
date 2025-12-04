@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addCard } from "../../lib/services/addCard";
+import { addTask } from "../../lib/services/addTask";
 import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
 import { Card } from "../../lib/types/Card";
 
@@ -11,10 +11,10 @@ const createBoard = () => ({
   })),
 });
 
-describe("addCard", () => {
+describe("addTask", () => {
   it("successfully adds a card to a column", () => {
     const board = createBoard();
-    const result = addCard(board, "TODO", "New card text");
+    const result = addTask(board, "TODO", "New card text");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -29,8 +29,8 @@ describe("addCard", () => {
 
   it("adds card with a unique UUID", () => {
     const board = createBoard();
-    const result1 = addCard(board, "TODO", "First card");
-    const result2 = addCard(board, "TODO", "Second card");
+    const result1 = addTask(board, "TODO", "First card");
+    const result2 = addTask(board, "TODO", "Second card");
 
     expect(result1.ok).toBe(true);
     expect(result2.ok).toBe(true);
@@ -48,11 +48,11 @@ describe("addCard", () => {
 
   it("adds multiple cards to the same column", () => {
     const board = createBoard();
-    const result1 = addCard(board, "BACKLOG", "First card");
+    const result1 = addTask(board, "BACKLOG", "First card");
     expect(result1.ok).toBe(true);
     if (!result1.ok) return;
 
-    const result2 = addCard(result1.board, "BACKLOG", "Second card");
+    const result2 = addTask(result1.board, "BACKLOG", "Second card");
     expect(result2.ok).toBe(true);
     if (!result2.ok) return;
 
@@ -66,11 +66,11 @@ describe("addCard", () => {
 
   it("can add cards to different columns", () => {
     const board = createBoard();
-    const result1 = addCard(board, "BACKLOG", "Backlog card");
+    const result1 = addTask(board, "BACKLOG", "Backlog card");
     expect(result1.ok).toBe(true);
     if (!result1.ok) return;
 
-    const result2 = addCard(result1.board, "DONE", "Done card");
+    const result2 = addTask(result1.board, "DONE", "Done card");
     expect(result2.ok).toBe(true);
     if (!result2.ok) return;
 
@@ -91,7 +91,7 @@ describe("addCard", () => {
     if (!backlogColumn) throw new Error("Missing BACKLOG column");
     backlogColumn.cards.push({ id: "existing-1", text: "Existing card" });
 
-    const result = addCard(board, "BACKLOG", "New card");
+    const result = addTask(board, "BACKLOG", "New card");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -110,7 +110,7 @@ describe("addCard", () => {
     if (!todoColumn) throw new Error("Missing TODO column");
     todoColumn.cards.push({ id: "todo-1", text: "Todo card" });
 
-    const result = addCard(board, "BACKLOG", "Backlog card");
+    const result = addTask(board, "BACKLOG", "Backlog card");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -124,7 +124,7 @@ describe("addCard", () => {
 
   it("trims leading and trailing whitespace from card text", () => {
     const board = createBoard();
-    const result = addCard(board, "DOING", "  Trimmed text  ");
+    const result = addTask(board, "DOING", "  Trimmed text  ");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -135,7 +135,7 @@ describe("addCard", () => {
 
   it("returns error when card text is empty", () => {
     const board = createBoard();
-    const result = addCard(board, "TODO", "");
+    const result = addTask(board, "TODO", "");
 
     expect(result).toEqual({
       ok: false,
@@ -145,7 +145,7 @@ describe("addCard", () => {
 
   it("returns error when card text is only whitespace", () => {
     const board = createBoard();
-    const result = addCard(board, "TODO", "   ");
+    const result = addTask(board, "TODO", "   ");
 
     expect(result).toEqual({
       ok: false,
@@ -155,7 +155,7 @@ describe("addCard", () => {
 
   it("returns error when column is not found", () => {
     const board = createBoard();
-    const result = addCard(board, "UNKNOWN" as ColumnId, "Some text");
+    const result = addTask(board, "UNKNOWN" as ColumnId, "Some text");
 
     expect(result).toEqual({
       ok: false,
@@ -165,7 +165,7 @@ describe("addCard", () => {
 
   it("returns a new board object (immutability)", () => {
     const board = createBoard();
-    const result = addCard(board, "TODO", "New card");
+    const result = addTask(board, "TODO", "New card");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -176,7 +176,7 @@ describe("addCard", () => {
 
   it("preserves column structure and other properties", () => {
     const board = createBoard();
-    const result = addCard(board, "TODO", "New card");
+    const result = addTask(board, "TODO", "New card");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;

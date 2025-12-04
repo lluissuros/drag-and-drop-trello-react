@@ -13,14 +13,14 @@ import {
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import CardItem from "./CardItem";
+import Task from "./Task";
 
 type ColumnProps = {
   column: ColumnModel;
-  onAddCard: (columnId: ColumnId, text: string) => boolean;
+  onAddTask: (columnId: ColumnId, text: string) => boolean;
 };
 
-const Column = ({ column, onAddCard }: ColumnProps) => {
+const Column = ({ column, onAddTask }: ColumnProps) => {
   const [text, setText] = useState("");
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${column.id}`,
@@ -29,7 +29,7 @@ const Column = ({ column, onAddCard }: ColumnProps) => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const added = onAddCard(column.id, text);
+    const added = onAddTask(column.id, text);
     if (added) {
       setText("");
     }
@@ -60,7 +60,7 @@ const Column = ({ column, onAddCard }: ColumnProps) => {
             }`}
           >
             {column.cards.map((card) => (
-              <CardItem key={card.id} card={card} columnId={column.id} />
+              <Task key={card.id} card={card} columnId={column.id} />
             ))}
           </div>
         </SortableContext>

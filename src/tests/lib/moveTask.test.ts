@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { moveCard, ErrorReasons } from "../../lib/services/moveCard";
+import { moveTask, ErrorReasons } from "../../lib/services/moveTask";
 import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
 import { Card } from "../../lib/types/Card";
 
@@ -19,10 +19,10 @@ const createBoardWithCard = (columnId: ColumnId, cardId = "card-1") => {
   return board;
 };
 
-describe("moveCard domain rules", () => {
+describe("moveTask domain rules", () => {
   it("moves a card to an adjacent forward column", () => {
     const board = createBoardWithCard("BACKLOG");
-    const result = moveCard(board, "card-1", "TODO");
+    const result = moveTask(board, "card-1", "TODO");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -36,7 +36,7 @@ describe("moveCard domain rules", () => {
 
   it("blocks jumps over columns", () => {
     const board = createBoardWithCard("BACKLOG");
-    const result = moveCard(board, "card-1", "DOING");
+    const result = moveTask(board, "card-1", "DOING");
 
     expect(result).toEqual({
       ok: false,
@@ -53,7 +53,7 @@ describe("moveCard domain rules", () => {
     if (!todo) throw new Error("Missing TODO column");
     todo.cards.push({ id: "c3", text: "Third" });
 
-    const result = moveCard(board, "c3", "DOING");
+    const result = moveTask(board, "c3", "DOING");
     expect(result).toEqual({
       ok: false,
       reason: ErrorReasons.DoingColumnCanOnlyContain2Cards,
@@ -62,12 +62,12 @@ describe("moveCard domain rules", () => {
 
   it("allows moving from TODO to DOING and DOING to DONE", () => {
     const board = createBoardWithCard("TODO");
-    const intoDoing = moveCard(board, "card-1", "DOING");
+    const intoDoing = moveTask(board, "card-1", "DOING");
 
     expect(intoDoing.ok).toBe(true);
     if (!intoDoing.ok) return;
 
-    const intoDone = moveCard(intoDoing.board, "card-1", "DONE");
+    const intoDone = moveTask(intoDoing.board, "card-1", "DONE");
     expect(intoDone.ok).toBe(true);
     if (!intoDone.ok) return;
     expect(
@@ -77,7 +77,7 @@ describe("moveCard domain rules", () => {
 
   it("blocks moving out of DONE", () => {
     const board = createBoardWithCard("DONE");
-    const result = moveCard(board, "card-1", "DOING");
+    const result = moveTask(board, "card-1", "DOING");
     expect(result).toEqual({
       ok: false,
       reason: ErrorReasons.CardsInDoneCannotBeMoved,
@@ -86,7 +86,7 @@ describe("moveCard domain rules", () => {
 
   it("does nothing when target column matches source", () => {
     const board = createBoardWithCard("TODO");
-    const result = moveCard(board, "card-1", "TODO");
+    const result = moveTask(board, "card-1", "TODO");
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -95,7 +95,7 @@ describe("moveCard domain rules", () => {
 
   it("validates target column ids", () => {
     const board = createBoardWithCard("BACKLOG");
-    const result = moveCard(board, "card-1", "UNKNOWN" as ColumnId);
+    const result = moveTask(board, "card-1", "UNKNOWN" as ColumnId);
     expect(result).toEqual({
       ok: false,
       reason: ErrorReasons.InvalidTargetColumn,

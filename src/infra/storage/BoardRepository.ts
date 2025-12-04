@@ -3,7 +3,12 @@ import { validateBoard } from "../../lib/validators";
 
 const STORAGE_KEY = "tasks-board";
 
-export const BoardRepository = {
+interface BoardRepository {
+  load(): Board | null;
+  save(board: Board): void;
+}
+
+export const BoardRepository: BoardRepository = {
   load(): Board | null {
     if (typeof localStorage === "undefined") return null;
 

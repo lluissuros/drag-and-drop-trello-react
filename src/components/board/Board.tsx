@@ -7,8 +7,8 @@ import {
 } from "@dnd-kit/core";
 import { RefObject, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Card as CardModel } from "../../lib/types/Card";
-import { COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
+import { Card as CardType } from "../../lib/types/Card";
+import { ColumnId } from "../../lib/types/Column";
 import { useBoard } from "../../hooks/useBoard";
 import ConfirmDoneDialog from "../dialogs/ConfirmDoneDialog";
 import { Card, CardContent } from "../ui/card";
@@ -16,7 +16,7 @@ import Column from "./Column";
 
 //TODO: review this
 export type BoardTestApi = {
-  moveCard: (cardId: string, columnId: ColumnId) => void;
+  moveTask: (cardId: string, columnId: ColumnId) => void;
 };
 
 const Board = ({
@@ -24,64 +24,46 @@ const Board = ({
 }: {
   testApiRef?: RefObject<BoardTestApi | null>;
 }) => {
-  const { board, moveCard, addCard } = useBoard();
+  const { board, moveTask, addTask } = useBoard();
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [pendingDone, setPendingDone] = useState<{
     cardId: string;
     targetColumnId: ColumnId;
   } | null>(null);
 
-  const findColumnByCardId = (cardId: string) =>
-    board.columns.find((column) =>
-      column.cards.some((card) => card.id === cardId)
-    );
-
-  const findCardById = (cardId: string): CardModel | undefined => {
+  const findCardById = (cardId: string): CardType | undefined => {
     for (const column of board.columns) {
-      const found = column.cards.find((card) => card.id === cardId);
-      if (found) return found;
+      for (const card of column.cards) {
+        if (card.id === cardId) return card;
+      }
     }
-    return undefined;
   };
+
+  const activeCard = activeCardId ? findCardById(activeCardId) : undefined;
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveCardId(event.active.id as string);
   };
 
-  const resolveTargetColumn = (
-    overId: string | number,
-    data?: { columnId?: ColumnId }
-  ): ColumnId | null => {
-    if (data?.columnId) {
-      return data.columnId;
-    }
-    const asString = String(overId);
-    if (asString.startsWith("column-")) {
-      return asString.replace("column-", "") as ColumnId;
-    }
-    return null;
-  };
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCardId(null);
-
     if (!over) return;
 
-    const activeId = String(active.id);
-    const fromColumn = findColumnByCardId(activeId);
-    if (!fromColumn) return;
+    const activeCardId = String(active.id);
+    const fromColumn = active.data.current as { columnId: ColumnId };
+    const targetColumn = over.data.current as { columnId: ColumnId };
+    const targetColumnId = targetColumn.columnId;
 
-    const overData = over.data.current as { columnId?: ColumnId } | undefined;
-    const targetColumnId = resolveTargetColumn(over.id, overData);
-    if (!targetColumnId) return;
-
-    if (targetColumnId === "DONE" && fromColumn.id !== "DONE") {
-      setPendingDone({ cardId: activeId, targetColumnId });
+    if (targetColumnId === "DONE" && fromColumn.columnId !== "DONE") {
+      setPendingDone({
+        cardId: activeCardId,
+        targetColumnId: targetColumnId,
+      });
       return;
     }
 
-    const result = moveCard(activeId, targetColumnId);
+    const result = moveTask(activeCardId, targetColumnId);
     if (!result.ok) {
       toast.error(result.reason);
     }
@@ -91,8 +73,9 @@ const Board = ({
     setActiveCardId(null);
   };
 
-  const handleAddCard = (columnId: ColumnId, text: string) => {
-    const result = addCard(columnId, text);
+  const handleAddTask = (columnId: ColumnId, text: string) => {
+    //TODO: maybe this could go in the Task itself
+    const result = addTask(columnId, text);
     if (!result.ok) {
       toast.error(result.reason);
     }
@@ -101,7 +84,7 @@ const Board = ({
 
   const confirmDoneMove = () => {
     if (!pendingDone) return;
-    const result = moveCard(pendingDone.cardId, pendingDone.targetColumnId);
+    const result = moveTask(pendingDone.cardId, pendingDone.targetColumnId);
     if (!result.ok) {
       toast.error(result.reason);
     }
@@ -112,14 +95,12 @@ const Board = ({
     setPendingDone(null);
   };
 
-  const activeCard = activeCardId ? findCardById(activeCardId) : undefined;
-
   useEffect(() => {
     //testApiRef is used for testing the board
     if (!testApiRef) return;
     testApiRef.current = {
-      moveCard: (cardId: string, columnId: ColumnId) => {
-        const result = moveCard(cardId, columnId);
+      moveTask: (cardId: string, columnId: ColumnId) => {
+        const result = moveTask(cardId, columnId);
         if (!result.ok) {
           toast.error(result.reason);
         }
@@ -129,7 +110,7 @@ const Board = ({
     return () => {
       testApiRef.current = null;
     };
-  }, [moveCard, testApiRef]);
+  }, [moveTask, testApiRef]);
 
   return (
     <div className="space-y-4">
@@ -140,13 +121,12 @@ const Board = ({
         onDragCancel={handleDragCancel}
       >
         <div className="flex gap-4 overflow-x-auto pb-8">
-          {COLUMN_ORDER.map((columnId) => {
-            const column = board.columns.find((col) => col.id === columnId)!;
+          {board.columns.map((column) => {
             return (
               <Column
                 key={column.id}
                 column={column}
-                onAddCard={handleAddCard}
+                onAddTask={handleAddTask}
               />
             );
           })}
@@ -154,7 +134,7 @@ const Board = ({
 
         <DragOverlay>
           {activeCard ? (
-            <Card className="w-64 shadow-lg">
+            <Card className="w-64 shadow-lg opacity-80 rotate-[15deg]">
               <CardContent className="py-3 text-sm text-slate-800">
                 {activeCard.text}
               </CardContent>

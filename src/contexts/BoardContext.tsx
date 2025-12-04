@@ -8,20 +8,20 @@ import {
 import type { Board } from "../lib/types/Board";
 import type { ColumnId } from "../lib/types/Column";
 import {
-  addCard as addCardDomain,
-  type AddCardResult,
-} from "../lib/services/addCard";
+  addTask as addTaskDomain,
+  type addTaskResult,
+} from "../lib/services/addTask";
 import { createBoard } from "../lib/services/createBoard";
 import {
-  moveCard as moveCardDomain,
-  type MoveCardResult,
-} from "../lib/services/moveCard";
+  moveTask as moveTaskDomain,
+  type moveTaskResult,
+} from "../lib/services/moveTask";
 import { BoardRepository } from "../infra/storage/BoardRepository";
 
 interface BoardContextValue {
   board: Board;
-  moveCard: (cardId: string, targetColumnId: ColumnId) => MoveCardResult;
-  addCard: (columnId: ColumnId, text: string) => AddCardResult;
+  moveTask: (cardId: string, targetColumnId: ColumnId) => moveTaskResult;
+  addTask: (columnId: ColumnId, text: string) => addTaskResult;
 }
 
 // undefined forces consumers to use the provider.`
@@ -44,9 +44,9 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
     () => BoardRepository.load() ?? createBoard()
   );
 
-  const moveCard = useCallback(
+  const moveTask = useCallback(
     (cardId: string, targetColumnId: ColumnId) => {
-      const result = moveCardDomain(board, cardId, targetColumnId);
+      const result = moveTaskDomain(board, cardId, targetColumnId);
       if (result.ok) {
         setBoard(result.board);
         BoardRepository.save(result.board);
@@ -56,9 +56,9 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
     [board]
   );
 
-  const addCard = useCallback(
+  const addTask = useCallback(
     (columnId: ColumnId, text: string) => {
-      const result = addCardDomain(board, columnId, text);
+      const result = addTaskDomain(board, columnId, text);
       if (result.ok) {
         setBoard(result.board);
         BoardRepository.save(result.board);
@@ -71,10 +71,10 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
   const value = useMemo(
     () => ({
       board,
-      moveCard,
-      addCard,
+      moveTask,
+      addTask,
     }),
-    [board, moveCard, addCard]
+    [board, moveTask, addTask]
   );
 
   return (

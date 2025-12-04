@@ -11,7 +11,7 @@ export const ErrorReasons = {
 
 export type ErrorReason = (typeof ErrorReasons)[keyof typeof ErrorReasons];
 
-export type MoveCardResult =
+export type moveTaskResult =
   | { ok: true; board: Board }
   | { ok: false; reason: ErrorReason };
 
@@ -22,11 +22,11 @@ export type MoveCardResult =
  * @param targetColumnId - The id of the column to move the card to.
  * @returns A result object with the updated board if the move was successful, or an error reason if it was not.
  */
-export const moveCard = (
+export const moveTask = (
   board: Board,
   cardId: string,
   targetColumnId: ColumnId
-): MoveCardResult => {
+): moveTaskResult => {
   const sourceColumnIndex = board.columns.findIndex((column) =>
     column.cards.some((card) => card.id === cardId)
   );
