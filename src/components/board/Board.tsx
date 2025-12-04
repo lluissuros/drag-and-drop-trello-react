@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Card as CardType } from "../../lib/types/Card";
 import { ColumnId } from "../../lib/types/Column";
 import { useBoard } from "../../hooks/useBoard";
-import ConfirmDoneDialog from "../dialogs/ConfirmDoneDialog";
+import ConfirmDoneDialog, { PendingDone } from "../dialogs/ConfirmDoneDialog";
 import { Card, CardContent } from "../ui/card";
 import Column from "./Column";
 
@@ -19,17 +19,14 @@ export type BoardTestApi = {
   moveTask: (cardId: string, columnId: ColumnId) => void;
 };
 
-const Board = ({
+export default function Board({
   testApiRef,
 }: {
   testApiRef?: RefObject<BoardTestApi | null>;
-}) => {
+}) {
   const { board, moveTask } = useBoard();
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
-  const [pendingDone, setPendingDone] = useState<{
-    cardId: string;
-    targetColumnId: ColumnId;
-  } | null>(null);
+  const [pendingDone, setPendingDone] = useState<PendingDone | null>(null);
 
   const findCardById = (cardId: string): CardType | undefined => {
     for (const column of board.columns) {
@@ -48,7 +45,7 @@ const Board = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCardId(null);
-    if (!over) return;
+    if (!over) return; // the card is not over a column
 
     const activeCardId = String(active.id);
     const fromColumn = active.data.current as { columnId: ColumnId };
@@ -71,19 +68,6 @@ const Board = ({
 
   const handleDragCancel = () => {
     setActiveCardId(null);
-  };
-
-  const confirmDoneMove = () => {
-    if (!pendingDone) return;
-    const result = moveTask(pendingDone.cardId, pendingDone.targetColumnId);
-    if (!result.ok) {
-      toast.error(result.reason);
-    }
-    setPendingDone(null);
-  };
-
-  const cancelDoneMove = () => {
-    setPendingDone(null);
   };
 
   useEffect(() => {
@@ -129,12 +113,9 @@ const Board = ({
       </DndContext>
 
       <ConfirmDoneDialog
-        open={Boolean(pendingDone)}
-        onCancel={cancelDoneMove}
-        onConfirm={confirmDoneMove}
+        pendingDone={pendingDone}
+        onClose={() => setPendingDone(null)}
       />
     </div>
   );
-};
-
-export default Board;
+}

@@ -3,7 +3,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import { Column as ColumnModel } from "../../lib/types/Column";
+import { Column as ColumnType } from "../../lib/types/Column";
 import {
   Card as CardComponent,
   CardContent,
@@ -14,7 +14,7 @@ import Task from "./Task";
 import { AddTaskForm } from "./AddTaskForm";
 
 type ColumnProps = {
-  column: ColumnModel;
+  column: ColumnType;
 };
 
 const Column = ({ column }: ColumnProps) => {
