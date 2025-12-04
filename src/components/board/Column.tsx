@@ -3,37 +3,25 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import { FormEvent, useState } from "react";
-import { Column as ColumnModel, ColumnId } from "../../lib/types/Column";
+import { Column as ColumnModel } from "../../lib/types/Column";
 import {
   Card as CardComponent,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import Task from "./Task";
+import { AddTaskForm } from "./AddTaskForm";
 
 type ColumnProps = {
   column: ColumnModel;
-  onAddTask: (columnId: ColumnId, text: string) => boolean;
 };
 
-const Column = ({ column, onAddTask }: ColumnProps) => {
-  const [text, setText] = useState("");
+const Column = ({ column }: ColumnProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${column.id}`,
     data: { columnId: column.id },
   });
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const added = onAddTask(column.id, text);
-    if (added) {
-      setText("");
-    }
-  };
 
   return (
     <CardComponent
@@ -65,17 +53,7 @@ const Column = ({ column, onAddTask }: ColumnProps) => {
           </div>
         </SortableContext>
 
-        <form onSubmit={handleSubmit} className="mt-auto flex gap-2 pt-2">
-          <Input
-            aria-label={`Add card to ${column.title}`}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Add a card"
-          />
-          <Button type="submit" disabled={!text.trim()}>
-            Add
-          </Button>
-        </form>
+        <AddTaskForm column={column} />
       </CardContent>
     </CardComponent>
   );

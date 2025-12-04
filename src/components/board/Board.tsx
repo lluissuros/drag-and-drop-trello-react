@@ -24,7 +24,7 @@ const Board = ({
 }: {
   testApiRef?: RefObject<BoardTestApi | null>;
 }) => {
-  const { board, moveTask, addTask } = useBoard();
+  const { board, moveTask } = useBoard();
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
   const [pendingDone, setPendingDone] = useState<{
     cardId: string;
@@ -73,15 +73,6 @@ const Board = ({
     setActiveCardId(null);
   };
 
-  const handleAddTask = (columnId: ColumnId, text: string) => {
-    //TODO: maybe this could go in the Task itself
-    const result = addTask(columnId, text);
-    if (!result.ok) {
-      toast.error(result.reason);
-    }
-    return result.ok;
-  };
-
   const confirmDoneMove = () => {
     if (!pendingDone) return;
     const result = moveTask(pendingDone.cardId, pendingDone.targetColumnId);
@@ -122,13 +113,7 @@ const Board = ({
       >
         <div className="flex gap-4 overflow-x-auto pb-8">
           {board.columns.map((column) => {
-            return (
-              <Column
-                key={column.id}
-                column={column}
-                onAddTask={handleAddTask}
-              />
-            );
+            return <Column key={column.id} column={column} />;
           })}
         </div>
 
