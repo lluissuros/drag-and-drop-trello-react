@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { moveTask, ErrorReasons } from "../../lib/services/moveTask";
 import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
-import { Card } from "../../lib/types/Card";
+import { Task } from "../../lib/types/Task";
 
 const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({
     id,
     title: COLUMN_LABELS[id],
-    cards: [] as Card[],
+    cards: [] as Task[],
   })),
 });
 

@@ -12,7 +12,7 @@ export const addTask = (
 ): addTaskResult => {
   const trimmed = text.trim();
   if (!trimmed) {
-    return { ok: false, reason: "Card text cannot be empty" };
+    return { ok: false, reason: "Task text cannot be empty" };
   }
 
   const columnIndex = board.columns.findIndex(
@@ -22,13 +22,13 @@ export const addTask = (
     return { ok: false, reason: "Column not found" };
   }
 
-  const newCardId = crypto.randomUUID();
+  const newTaskId = crypto.randomUUID();
   const newBoard: Board = {
     columns: board.columns.map((column, index) =>
       index === columnIndex
         ? {
             ...column,
-            cards: [...column.cards, { id: newCardId, text: trimmed }],
+            tasks: [...column.tasks, { id: newTaskId, text: trimmed }],
           }
         : column
     ),

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Board } from "./types/Board";
 import { COLUMN_ORDER } from "./types/Column";
 
-const cardSchema = z.object({
+const taskSchema = z.object({
   id: z.string(),
   text: z.string(),
 });
@@ -10,7 +10,7 @@ const cardSchema = z.object({
 const columnSchema = z.object({
   id: z.enum(COLUMN_ORDER),
   title: z.string(),
-  cards: z.array(cardSchema),
+  tasks: z.array(taskSchema),
 });
 
 const boardSchema = z
@@ -48,14 +48,14 @@ export const validateBoard = (input: unknown): BoardValidationResult => {
     return { ok: false, reason };
   }
 
-  // Extra safety: ensure card ids are unique within the board
+  // Extra safety: ensure task ids are unique within the board
   const ids = new Set<string>();
   for (const column of result.data.columns) {
-    for (const card of column.cards) {
-      if (ids.has(card.id)) {
-        return { ok: false, reason: "Duplicate card id found" };
+    for (const task of column.tasks) {
+      if (ids.has(task.id)) {
+        return { ok: false, reason: "Duplicate task id found" };
       }
-      ids.add(card.id);
+      ids.add(task.id);
     }
   }
 

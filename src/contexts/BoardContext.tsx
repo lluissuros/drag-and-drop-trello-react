@@ -20,7 +20,7 @@ import { BoardRepository } from "../infra/storage/BoardRepository";
 
 interface BoardContextValue {
   board: Board;
-  moveTask: (cardId: string, targetColumnId: ColumnId) => moveTaskResult;
+  moveTask: (taskId: string, targetColumnId: ColumnId) => moveTaskResult;
   addTask: (columnId: ColumnId, text: string) => addTaskResult;
 }
 
@@ -45,8 +45,8 @@ export const BoardProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const moveTask = useCallback(
-    (cardId: string, targetColumnId: ColumnId) => {
-      const result = moveTaskDomain(board, cardId, targetColumnId);
+    (taskId: string, targetColumnId: ColumnId) => {
+      const result = moveTaskDomain(board, taskId, targetColumnId);
       if (result.ok) {
         setBoard(result.board);
         BoardRepository.save(result.board);

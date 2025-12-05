@@ -7,12 +7,13 @@ import {
 } from "@dnd-kit/core";
 import { RefObject, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Card as CardType } from "../../lib/types/Card";
+import { Task as TaskType } from "../../lib/types/Task";
 import { ColumnId } from "../../lib/types/Column";
 import { useBoard } from "../../hooks/useBoard";
 import ConfirmDoneDialog, { PendingDone } from "../dialogs/ConfirmDoneDialog";
 import { Card, CardContent } from "../ui/card";
 import Column from "./Column";
+import { TaskDraggableData } from "./Task";
 
 //TODO: review this
 export type BoardTestApi = {
@@ -25,34 +26,24 @@ export default function Board({
   testApiRef?: RefObject<BoardTestApi | null>;
 }) {
   const { board, moveTask } = useBoard();
-  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [activeTask, setActiveTask] = useState<TaskType | null>(null);
   const [pendingDone, setPendingDone] = useState<PendingDone | null>(null);
 
-  const findCardById = (cardId: string): CardType | undefined => {
-    for (const column of board.columns) {
-      for (const card of column.cards) {
-        if (card.id === cardId) return card;
-      }
-    }
-  };
-
-  const activeCard = activeCardId ? findCardById(activeCardId) : undefined;
-
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveCardId(event.active.id as string);
+    setActiveTask((event.active.data.current?.task as TaskType) || null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveCardId(null);
+    setActiveTask(null);
     if (!over) return; // the card is not over a column
 
     const activeCardId = String(active.id);
-    const fromColumn = active.data.current as { columnId: ColumnId };
-    const targetColumn = over.data.current as { columnId: ColumnId };
-    const targetColumnId = targetColumn.columnId;
+    const fromData = active.data.current as TaskDraggableData;
+    const targetData = over.data.current as TaskDraggableData;
+    const targetColumnId = targetData.columnId;
 
-    if (targetColumnId === "DONE" && fromColumn.columnId !== "DONE") {
+    if (targetColumnId === "DONE" && fromData.columnId !== "DONE") {
       setPendingDone({
         cardId: activeCardId,
         targetColumnId: targetColumnId,
@@ -67,7 +58,7 @@ export default function Board({
   };
 
   const handleDragCancel = () => {
-    setActiveCardId(null);
+    setActiveTask(null);
   };
 
   useEffect(() => {
@@ -102,10 +93,10 @@ export default function Board({
         </div>
 
         <DragOverlay>
-          {activeCard ? (
+          {activeTask ? (
             <Card className="w-64 shadow-lg opacity-80 rotate-[15deg]">
               <CardContent className="py-3 text-sm text-slate-800">
-                {activeCard.text}
+                {activeTask.text}
               </CardContent>
             </Card>
           ) : null}

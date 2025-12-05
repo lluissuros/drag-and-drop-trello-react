@@ -5,6 +5,6 @@ export const createBoard = (): Board => ({
   columns: COLUMN_ORDER.map((id) => ({
     id,
     title: COLUMN_LABELS[id],
-    cards: [],
+    tasks: [],
   })),
 });

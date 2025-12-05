@@ -39,7 +39,7 @@ const Column = ({ column }: ColumnProps) => {
         className="flex flex-1 flex-col p-4"
       >
         <SortableContext
-          items={column.cards.map((card) => card.id)}
+          items={column.tasks.map((task) => task.id)}
           strategy={verticalListSortingStrategy}
         >
           <div
@@ -47,8 +47,8 @@ const Column = ({ column }: ColumnProps) => {
               isOver ? "bg-slate-50/70 rounded-lg p-1" : ""
             }`}
           >
-            {column.cards.map((card) => (
-              <Task key={card.id} card={card} columnId={column.id} />
+            {column.tasks.map((task) => (
+              <Task key={task.id} task={task} columnId={column.id} />
             ))}
           </div>
         </SortableContext>

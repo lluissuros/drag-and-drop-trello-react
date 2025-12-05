@@ -2,11 +2,11 @@ import { Board } from "../types/Board";
 import { COLUMN_ORDER, ColumnId } from "../types/Column";
 
 export const ErrorReasons = {
-  CardNotFound: "Card not found",
+  TaskNotFound: "task not found",
   InvalidTargetColumn: "Invalid target column",
-  CardsInDoneCannotBeMoved: "Cards in DONE cannot be moved",
-  CardsCanOnlyMoveToAdjacentColumns: "Cards can only move to adjacent columns",
-  DoingColumnCanOnlyContain2Cards: "DOING column can only contain 2 cards",
+  TasksInDoneCannotBeMoved: "tasks in DONE cannot be moved",
+  TasksCanOnlyMoveToAdjacentColumns: "tasks can only move to adjacent columns",
+  DoingColumnCanOnlyContain2tasks: "DOING column can only contain 2 tasks",
 } as const;
 
 export type ErrorReason = (typeof ErrorReasons)[keyof typeof ErrorReasons];
@@ -16,22 +16,22 @@ export type moveTaskResult =
   | { ok: false; reason: ErrorReason };
 
 /**
- * Moves a card from one column to another.
- * @param board - The board to move the card on.
- * @param cardId - The id of the card to move.
- * @param targetColumnId - The id of the column to move the card to.
+ * Moves a task from one column to another.
+ * @param board - The board to move the task on.
+ * @param taskId - The id of the task to move.
+ * @param targetColumnId - The id of the column to move the task to.
  * @returns A result object with the updated board if the move was successful, or an error reason if it was not.
  */
 export const moveTask = (
   board: Board,
-  cardId: string,
+  taskId: string,
   targetColumnId: ColumnId
 ): moveTaskResult => {
   const sourceColumnIndex = board.columns.findIndex((column) =>
-    column.cards.some((card) => card.id === cardId)
+    column.tasks.some((task) => task.id === taskId)
   );
   if (sourceColumnIndex === -1) {
-    return { ok: false, reason: ErrorReasons.CardNotFound };
+    return { ok: false, reason: ErrorReasons.TaskNotFound };
   }
 
   const targetIndex = COLUMN_ORDER.indexOf(targetColumnId);
@@ -40,13 +40,13 @@ export const moveTask = (
   }
 
   const sourceColumn = board.columns[sourceColumnIndex];
-  const card = sourceColumn.cards.find((item) => item.id === cardId);
-  if (!card) {
-    return { ok: false, reason: ErrorReasons.CardNotFound };
+  const task = sourceColumn.tasks.find((item) => item.id === taskId);
+  if (!task) {
+    return { ok: false, reason: ErrorReasons.TaskNotFound };
   }
 
   if (sourceColumn.id === "DONE" && targetColumnId !== "DONE") {
-    return { ok: false, reason: ErrorReasons.CardsInDoneCannotBeMoved };
+    return { ok: false, reason: ErrorReasons.TasksInDoneCannotBeMoved };
   }
 
   if (sourceColumn.id === targetColumnId) {
@@ -57,7 +57,7 @@ export const moveTask = (
   if (!isAdjacent) {
     return {
       ok: false,
-      reason: ErrorReasons.CardsCanOnlyMoveToAdjacentColumns,
+      reason: ErrorReasons.TasksCanOnlyMoveToAdjacentColumns,
     };
   }
 
@@ -65,23 +65,23 @@ export const moveTask = (
   const isMovingIntoDoing = targetColumn.id === "DOING";
   if (
     isMovingIntoDoing &&
-    !targetColumn.cards.some((c) => c.id === cardId) &&
-    targetColumn.cards.length >= 2
+    !targetColumn.tasks.some((c) => c.id === taskId) &&
+    targetColumn.tasks.length >= 2
   ) {
-    return { ok: false, reason: ErrorReasons.DoingColumnCanOnlyContain2Cards };
+    return { ok: false, reason: ErrorReasons.DoingColumnCanOnlyContain2tasks };
   }
 
   const updatedColumns = board.columns.map((column, index) => {
-    //move the card from the source column to the target column
+    //move the task from the source column to the target column
     if (index === sourceColumnIndex) {
       return {
         ...column,
-        cards: column.cards.filter((item) => item.id !== cardId),
+        tasks: column.tasks.filter((item) => item.id !== taskId),
       };
     }
 
     if (index === targetIndex) {
-      return { ...column, cards: [...column.cards, card] };
+      return { ...column, tasks: [...column.tasks, task] };
     }
 
     return column;

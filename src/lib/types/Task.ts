@@ -1,4 +1,4 @@
-export interface Card {
+export interface Task {
   id: string;
   text: string;
 }

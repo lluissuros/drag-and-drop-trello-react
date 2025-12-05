@@ -1,4 +1,4 @@
-import { Card } from "./Card";
+import { Task } from "./Task";
 
 export type ColumnId = "BACKLOG" | "TODO" | "DOING" | "DONE";
 
@@ -14,5 +14,5 @@ export const COLUMN_LABELS: Record<ColumnId, string> = {
 export interface Column {
   id: ColumnId;
   title: string;
-  cards: Card[];
+  tasks: Task[];
 }
