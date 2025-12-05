@@ -2,6 +2,8 @@
 
 A Kanban-style board application built with React+Vite, TypeScript, Tailwind, Shadcn and DndKit.
 
+[Preview live here 👀🤞](https://drag-and-drop-trello-react.vercel.app/ "Deployed on Vercel")
+
 Hopefully this project demonstrates clean architecture principles, comprehensive testing strategies, and effective separation of concerns.
 
 ## 📋 Requirements
