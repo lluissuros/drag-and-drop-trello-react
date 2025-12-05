@@ -5,7 +5,7 @@ import {
   DragOverlay,
   closestCorners,
 } from "@dnd-kit/core";
-import { RefObject, useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Task as TaskType } from "../../lib/types/Task";
 import { ColumnId } from "../../lib/types/Column";
@@ -20,11 +20,7 @@ export type BoardTestApi = {
   moveTask: (cardId: string, columnId: ColumnId) => void;
 };
 
-export default function Board({
-  testApiRef,
-}: {
-  testApiRef?: RefObject<BoardTestApi | null>;
-}) {
+export default function Board() {
   const { board, moveTask } = useBoard();
   const [activeTask, setActiveTask] = useState<TaskType | null>(null);
   const [pendingDone, setPendingDone] = useState<PendingDone | null>(null);
@@ -60,23 +56,6 @@ export default function Board({
   const handleDragCancel = () => {
     setActiveTask(null);
   };
-
-  useEffect(() => {
-    //testApiRef is used for testing the board
-    if (!testApiRef) return;
-    testApiRef.current = {
-      moveTask: (cardId: string, columnId: ColumnId) => {
-        const result = moveTask(cardId, columnId);
-        if (!result.ok) {
-          toast.error(result.reason);
-        }
-      },
-    };
-
-    return () => {
-      testApiRef.current = null;
-    };
-  }, [moveTask, testApiRef]);
 
   return (
     <div className="space-y-4">

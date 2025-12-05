@@ -1,7 +1,4 @@
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { Column as ColumnType } from "../../lib/types/Column";
 import {
@@ -40,7 +37,7 @@ const Column = ({ column }: ColumnProps) => {
       >
         <SortableContext
           items={column.tasks.map((task) => task.id)}
-          strategy={verticalListSortingStrategy}
+          // strategy={verticalListSortingStrategy}
         >
           <div
             className={`flex-1 ${

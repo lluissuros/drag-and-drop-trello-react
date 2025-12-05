@@ -40,7 +40,9 @@ export type BoardValidationResult =
   | { ok: true; board: Board }
   | { ok: false; reason: string };
 
-export const validateBoard = (input: unknown): BoardValidationResult => {
+export const validateBoard = (
+  input: Board | unknown
+): BoardValidationResult => {
   const result = boardSchema.safeParse(input);
 
   if (!result.success) {
