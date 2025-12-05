@@ -12,7 +12,7 @@ const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({
     id,
     title: COLUMN_LABELS[id],
-    cards: [] as Task[],
+    tasks: [] as Task[],
   })),
 });
 
@@ -26,17 +26,17 @@ describe("validateBoard", () => {
     expect(result.board).toEqual(board);
   });
 
-  it("validates a board with cards", () => {
+  it("validates a board with tasks", () => {
     const board = createBoard();
-    board.columns[0].cards.push({ id: "card-1", text: "Test card" });
-    board.columns[1].cards.push({ id: "card-2", text: "Another card" });
+    board.columns[0].tasks.push({ id: "card-1", text: "Test card" });
+    board.columns[1].tasks.push({ id: "card-2", text: "Another card" });
 
     const result = validateBoard(board);
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.board.columns[0].cards).toHaveLength(1);
-    expect(result.board.columns[1].cards).toHaveLength(1);
+    expect(result.board.columns[0].tasks).toHaveLength(1);
+    expect(result.board.columns[1].tasks).toHaveLength(1);
   });
 
   it("rejects board with missing columns", () => {
@@ -56,7 +56,7 @@ describe("validateBoard", () => {
     board.columns.push({
       id: "BACKLOG",
       title: "Duplicate",
-      cards: [],
+      tasks: [],
     });
 
     const result = validateBoard(board);
@@ -93,20 +93,20 @@ describe("validateBoard", () => {
 
   it("rejects board with duplicate card ids", () => {
     const board = createBoard();
-    board.columns[0].cards.push({ id: "duplicate-id", text: "Card 1" });
-    board.columns[1].cards.push({ id: "duplicate-id", text: "Card 2" });
+    board.columns[0].tasks.push({ id: "duplicate-id", text: "Card 1" });
+    board.columns[1].tasks.push({ id: "duplicate-id", text: "Card 2" });
 
     const result = validateBoard(board);
 
     expect(result).toEqual({
       ok: false,
-      reason: "Duplicate card id found",
+      reason: "Duplicate task id found",
     });
   });
 
   it("rejects board with duplicate card ids in same column", () => {
     const board = createBoard();
-    board.columns[0].cards.push(
+    board.columns[0].tasks.push(
       { id: "duplicate-id", text: "Card 1" },
       { id: "duplicate-id", text: "Card 2" }
     );
@@ -115,13 +115,13 @@ describe("validateBoard", () => {
 
     expect(result).toEqual({
       ok: false,
-      reason: "Duplicate card id found",
+      reason: "Duplicate task id found",
     });
   });
 
   it("rejects board with invalid card structure - missing id", () => {
     const board = createBoard();
-    board.columns[0].cards.push({ text: "Card without id" } as Task);
+    board.columns[0].tasks.push({ text: "Card without id" } as Task);
 
     const result = validateBoard(board);
 
@@ -132,7 +132,7 @@ describe("validateBoard", () => {
 
   it("rejects board with invalid card structure - missing text", () => {
     const board = createBoard();
-    board.columns[0].cards.push({ id: "card-1" } as Task);
+    board.columns[0].tasks.push({ id: "card-1" } as Task);
 
     const result = validateBoard(board);
 
@@ -163,9 +163,9 @@ describe("validateBoard", () => {
     expect(result.reason).toBeTruthy();
   });
 
-  it("rejects board with invalid column structure - missing cards", () => {
+  it("rejects board with invalid column structure - missing tasks", () => {
     const board = createBoard();
-    delete (board.columns[0] as Partial<Column>).cards;
+    delete (board.columns[0] as Partial<Column>).tasks;
 
     const result = validateBoard(board);
 
@@ -225,7 +225,7 @@ describe("validateBoard", () => {
 
   it("rejects card with wrong type for id", () => {
     const board = createBoard();
-    board.columns[0].cards.push({
+    board.columns[0].tasks.push({
       id: 123,
       text: "Card",
     } as unknown as Task);
@@ -239,7 +239,7 @@ describe("validateBoard", () => {
 
   it("rejects card with wrong type for text", () => {
     const board = createBoard();
-    board.columns[0].cards.push({ id: "card-1", text: 123 } as unknown as Task);
+    board.columns[0].tasks.push({ id: "card-1", text: 123 } as unknown as Task);
 
     const result = validateBoard(board);
 
@@ -259,9 +259,9 @@ describe("validateBoard", () => {
     expect(result.reason).toBeTruthy();
   });
 
-  it("rejects column with cards not being an array", () => {
+  it("rejects column with tasks not being an array", () => {
     const board = createBoard();
-    board.columns[0].cards = "not an array" as unknown as Task[];
+    board.columns[0].tasks = "not an array" as unknown as Task[];
 
     const result = validateBoard(board);
 

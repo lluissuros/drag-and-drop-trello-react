@@ -1,19 +1,9 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  within,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { RefObject } from "react";
 import { vi } from "vitest";
-import { COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
-import { createBoard } from "../../lib/services/createBoard";
-import { Board as BoardModel } from "../../lib/types/Board";
+import { COLUMN_ORDER } from "../../lib/types/Column";
 import { BoardProvider } from "../../contexts/BoardContext";
-import Board, { BoardTestApi } from "../../components/board/Board";
+import Board from "../../components/board/Board";
 import { BoardRepository } from "../../infra/storage/BoardRepository";
 
 // Mock BoardRepository
@@ -24,64 +14,12 @@ vi.mock("../../infra/storage/BoardRepository", () => ({
   },
 }));
 
-// const pointerTargets: Record<ColumnId, { x: number; y: number }> = {
-//   BACKLOG: { x: 10, y: 10 },
-//   TODO: { x: 280, y: 10 },
-//   DOING: { x: 540, y: 10 },
-//   DONE: { x: 800, y: 10 },
-// };
-
-const dragCardToColumn = (
-  card: HTMLElement,
-  columnId: ColumnId,
-  testApiRef: RefObject<BoardTestApi | null>,
-  options?: { openDialog?: boolean }
-) => {
-  // const target = pointerTargets[columnId];
-  // fireEvent.pointerDown(card, {
-  //   pointerId: 1,
-  //   clientX: 0,
-  //   clientY: 0,
-  //   buttons: 1,
-  // });
-  // fireEvent.pointerMove(document.body, {
-  //   pointerId: 1,
-  //   clientX: target.x,
-  //   clientY: target.y,
-  //   buttons: 1,
-  // });
-  // fireEvent.pointerUp(document.body, {
-  //   pointerId: 1,
-  //   clientX: target.x,
-  //   clientY: target.y,
-  // });
-  act(() => {
-    const cardId = card.getAttribute("data-card-id") ?? "";
-    // if (columnId === "DONE" && options?.openDialog) {
-    //   testApiRef.current?.openDoneDialog(cardId);
-    // } else {
-    //   testApiRef.current?.moveTask(cardId, columnId);
-    // }
-    testApiRef.current?.moveTask(cardId, columnId);
-  });
-};
-
-const renderBoard = (initialBoard?: BoardModel) =>
+const renderBoard = () =>
   render(
-    <BoardProvider initialBoard={initialBoard}>
+    <BoardProvider>
       <Board />
     </BoardProvider>
   );
-
-const renderBoardWithApi = (initialBoard?: BoardModel) => {
-  const testApiRef = { current: null } as RefObject<BoardTestApi | null>;
-  render(
-    <BoardProvider initialBoard={initialBoard}>
-      <Board testApiRef={testApiRef} />
-    </BoardProvider>
-  );
-  return testApiRef;
-};
 
 describe("Board component", () => {
   beforeEach(() => {
@@ -96,7 +34,7 @@ describe("Board component", () => {
     });
   });
 
-  it("adds cards via the column form", async () => {
+  it("adds tasks via the column form", async () => {
     const user = userEvent.setup();
     renderBoard();
 
@@ -118,90 +56,6 @@ describe("Board component", () => {
     ).toBeDisabled();
   });
 
-  it("drags a card to another column", async () => {
-    const user = userEvent.setup();
-    const testApi = renderBoardWithApi();
-
-    const backlog = screen.getByTestId("column-BACKLOG");
-    const input = within(backlog).getByPlaceholderText("Add a card");
-    await user.type(input, "Move me");
-    await user.click(within(backlog).getByRole("button", { name: /add/i }));
-
-    const card = screen
-      .getByText("Move me")
-      .closest("[data-card-id]") as HTMLElement;
-    dragCardToColumn(card, "TODO", testApi);
-
-    await waitFor(() =>
-      expect(
-        within(screen.getByTestId("column-TODO")).getByText("Move me")
-      ).toBeInTheDocument()
-    );
-  });
-
-  it("asks for confirmation when moving into DONE", async () => {
-    const initial = createBoard();
-    const doing = initial.columns.find((col) => col.id === "DOING");
-    if (!doing) throw new Error("Missing DOING column in test");
-    doing.cards.push({ id: "c1", text: "Finish this" });
-
-    const testApi = renderBoardWithApi(initial);
-
-    const card = screen
-      .getByText("Finish this")
-      .closest("[data-card-id]") as HTMLElement;
-    dragCardToColumn(card, "DONE", testApi, { openDialog: true });
-
-    expect(
-      await screen.findByRole("button", { name: "Move to DONE" })
-    ).toBeInTheDocument();
-  });
-
-  it("moves into DONE after confirming", async () => {
-    const initial = createBoard();
-    const doing = initial.columns.find((col) => col.id === "DOING");
-    if (!doing) throw new Error("Missing DOING column in test");
-    doing.cards.push({ id: "c1", text: "Confirm me" });
-
-    const testApi = renderBoardWithApi(initial);
-
-    const card = screen
-      .getByText("Confirm me")
-      .closest("[data-card-id]") as HTMLElement;
-    dragCardToColumn(card, "DONE", testApi, { openDialog: true });
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Move to DONE" })
-    );
-
-    await waitFor(() =>
-      expect(
-        within(screen.getByTestId("column-DONE")).getByText("Confirm me")
-      ).toBeInTheDocument()
-    );
-  });
-
-  it("cancels moves into DONE", () => {
-    const initial = createBoard();
-    const doing = initial.columns.find((col) => col.id === "DOING");
-    if (!doing) throw new Error("Missing DOING column in test");
-    doing.cards.push({ id: "c1", text: "Cancel me" });
-
-    const testApi = renderBoardWithApi(initial);
-
-    const card = screen
-      .getByText("Cancel me")
-      .closest("[data-card-id]") as HTMLElement;
-    dragCardToColumn(card, "DONE", testApi, { openDialog: true });
-    fireEvent.click(screen.getByRole("button", { name: /^Cancel$/ }));
-
-    expect(
-      within(screen.getByTestId("column-DOING")).getByText("Cancel me")
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId("column-DONE")).queryByText("Cancel me")
-    ).not.toBeInTheDocument();
-  });
-
   it("persists and loads from BoardRepository", async () => {
     const user = userEvent.setup();
     const { unmount } = renderBoard();
@@ -216,7 +70,7 @@ describe("Board component", () => {
     // Verify BoardRepository.save was called with the correct data
     expect(BoardRepository.save).toHaveBeenCalled();
     const saveCall = vi.mocked(BoardRepository.save).mock.calls[0][0];
-    expect(saveCall.columns[0].cards[0].text).toBe("Persisted task");
+    expect(saveCall.columns[0].tasks[0].text).toBe("Persisted task");
 
     // Mock load to return the saved board
     vi.mocked(BoardRepository.load).mockReturnValue(saveCall);

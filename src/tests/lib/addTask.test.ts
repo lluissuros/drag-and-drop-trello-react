@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { addTask } from "../../lib/services/addTask";
-import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
-import { Task } from "../../lib/types/Task";
+import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "@/lib/types/Column";
+import { Task } from "@/lib/types/Task";
 
 const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({
     id,
     title: COLUMN_LABELS[id],
-    cards: [] as Task[],
+    tasks: [] as Task[],
   })),
 });
 
@@ -21,10 +21,10 @@ describe("addTask", () => {
 
     const todoColumn = result.board.columns.find((col) => col.id === "TODO");
     expect(todoColumn).toBeDefined();
-    expect(todoColumn?.cards).toHaveLength(1);
-    expect(todoColumn?.cards[0].text).toBe("New card text");
-    expect(todoColumn?.cards[0].id).toBeDefined();
-    expect(typeof todoColumn?.cards[0].id).toBe("string");
+    expect(todoColumn?.tasks).toHaveLength(1);
+    expect(todoColumn?.tasks[0].text).toBe("New card text");
+    expect(todoColumn?.tasks[0].id).toBeDefined();
+    expect(typeof todoColumn?.tasks[0].id).toBe("string");
   });
 
   it("adds card with a unique UUID", () => {
@@ -37,16 +37,16 @@ describe("addTask", () => {
     if (!result1.ok || !result2.ok) return;
 
     const card1Id = result1.board.columns.find((col) => col.id === "TODO")
-      ?.cards[0].id;
+      ?.tasks[0].id;
     const card2Id = result2.board.columns.find((col) => col.id === "TODO")
-      ?.cards[0].id;
+      ?.tasks[0].id;
 
     expect(card1Id).toBeDefined();
     expect(card2Id).toBeDefined();
     expect(card1Id).not.toBe(card2Id);
   });
 
-  it("adds multiple cards to the same column", () => {
+  it("adds multiple tasks to the same column", () => {
     const board = createBoard();
     const result1 = addTask(board, "BACKLOG", "First card");
     expect(result1.ok).toBe(true);
@@ -59,12 +59,12 @@ describe("addTask", () => {
     const backlogColumn = result2.board.columns.find(
       (col) => col.id === "BACKLOG"
     );
-    expect(backlogColumn?.cards).toHaveLength(2);
-    expect(backlogColumn?.cards[0].text).toBe("First card");
-    expect(backlogColumn?.cards[1].text).toBe("Second card");
+    expect(backlogColumn?.tasks).toHaveLength(2);
+    expect(backlogColumn?.tasks[0].text).toBe("First card");
+    expect(backlogColumn?.tasks[1].text).toBe("Second card");
   });
 
-  it("can add cards to different columns", () => {
+  it("can add tasks to different columns", () => {
     const board = createBoard();
     const result1 = addTask(board, "BACKLOG", "Backlog card");
     expect(result1.ok).toBe(true);
@@ -79,17 +79,17 @@ describe("addTask", () => {
     );
     const doneColumn = result2.board.columns.find((col) => col.id === "DONE");
 
-    expect(backlogColumn?.cards).toHaveLength(1);
-    expect(backlogColumn?.cards[0].text).toBe("Backlog card");
-    expect(doneColumn?.cards).toHaveLength(1);
-    expect(doneColumn?.cards[0].text).toBe("Done card");
+    expect(backlogColumn?.tasks).toHaveLength(1);
+    expect(backlogColumn?.tasks[0].text).toBe("Backlog card");
+    expect(doneColumn?.tasks).toHaveLength(1);
+    expect(doneColumn?.tasks[0].text).toBe("Done card");
   });
 
-  it("preserves existing cards in the column", () => {
+  it("preserves existing tasks in the column", () => {
     const board = createBoard();
     const backlogColumn = board.columns.find((col) => col.id === "BACKLOG");
     if (!backlogColumn) throw new Error("Missing BACKLOG column");
-    backlogColumn.cards.push({ id: "existing-1", text: "Existing card" });
+    backlogColumn.tasks.push({ id: "existing-1", text: "Existing card" });
 
     const result = addTask(board, "BACKLOG", "New card");
 
@@ -99,16 +99,16 @@ describe("addTask", () => {
     const updatedColumn = result.board.columns.find(
       (col) => col.id === "BACKLOG"
     );
-    expect(updatedColumn?.cards).toHaveLength(2);
-    expect(updatedColumn?.cards[0].text).toBe("Existing card");
-    expect(updatedColumn?.cards[1].text).toBe("New card");
+    expect(updatedColumn?.tasks).toHaveLength(2);
+    expect(updatedColumn?.tasks[0].text).toBe("Existing card");
+    expect(updatedColumn?.tasks[1].text).toBe("New card");
   });
 
   it("does not modify other columns", () => {
     const board = createBoard();
     const todoColumn = board.columns.find((col) => col.id === "TODO");
     if (!todoColumn) throw new Error("Missing TODO column");
-    todoColumn.cards.push({ id: "todo-1", text: "Todo card" });
+    todoColumn.tasks.push({ id: "todo-1", text: "Todo card" });
 
     const result = addTask(board, "BACKLOG", "Backlog card");
 
@@ -118,8 +118,8 @@ describe("addTask", () => {
     const updatedTodoColumn = result.board.columns.find(
       (col) => col.id === "TODO"
     );
-    expect(updatedTodoColumn?.cards).toHaveLength(1);
-    expect(updatedTodoColumn?.cards[0].text).toBe("Todo card");
+    expect(updatedTodoColumn?.tasks).toHaveLength(1);
+    expect(updatedTodoColumn?.tasks[0].text).toBe("Todo card");
   });
 
   it("trims leading and trailing whitespace from card text", () => {
@@ -130,7 +130,7 @@ describe("addTask", () => {
     if (!result.ok) return;
 
     const doingColumn = result.board.columns.find((col) => col.id === "DOING");
-    expect(doingColumn?.cards[0].text).toBe("Trimmed text");
+    expect(doingColumn?.tasks[0].text).toBe("Trimmed text");
   });
 
   it("returns error when card text is empty", () => {
@@ -139,7 +139,7 @@ describe("addTask", () => {
 
     expect(result).toEqual({
       ok: false,
-      reason: "Card text cannot be empty",
+      reason: "Task text cannot be empty",
     });
   });
 
@@ -149,7 +149,7 @@ describe("addTask", () => {
 
     expect(result).toEqual({
       ok: false,
-      reason: "Card text cannot be empty",
+      reason: "Task text cannot be empty",
     });
   });
 
@@ -184,7 +184,7 @@ describe("addTask", () => {
     result.board.columns.forEach((column, index) => {
       expect(column.id).toBe(COLUMN_ORDER[index]);
       expect(column.title).toBe(COLUMN_LABELS[column.id]);
-      expect(Array.isArray(column.cards)).toBe(true);
+      expect(Array.isArray(column.tasks)).toBe(true);
     });
   });
 });

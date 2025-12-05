@@ -33,7 +33,7 @@ export const BoardContext = createContext<BoardContextValue | undefined>(
 /**
  * Provides the board context to the app.
  * Initializes the board from the repository or creates a new one if none is found.
- * creates the functions to move and add cards.
+ * creates the functions to move and add tasks.
  * Persists the board to the repository.
  *
  * @param children - The children to render.

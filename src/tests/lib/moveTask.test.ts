@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { moveTask, ErrorReasons } from "../../lib/services/moveTask";
 import { COLUMN_LABELS, COLUMN_ORDER, ColumnId } from "../../lib/types/Column";
-import { Task } from "../../lib/types/Task";
+import { Task } from "@/lib/types/Task";
 
 const createBoard = () => ({
   columns: COLUMN_ORDER.map((id) => ({
     id,
     title: COLUMN_LABELS[id],
-    cards: [] as Task[],
+    tasks: [] as Task[],
   })),
 });
 
@@ -15,7 +15,7 @@ const createBoardWithCard = (columnId: ColumnId, cardId = "card-1") => {
   const board = createBoard();
   const column = board.columns.find((col) => col.id === columnId);
   if (!column) throw new Error("Column not found in test setup");
-  column.cards.push({ id: cardId, text: `Card in ${columnId}` });
+  column.tasks.push({ id: cardId, text: `Card in ${columnId}` });
   return board;
 };
 
@@ -27,10 +27,10 @@ describe("moveTask domain rules", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(
-      result.board.columns.find((col) => col.id === "TODO")?.cards
+      result.board.columns.find((col) => col.id === "TODO")?.tasks
     ).toHaveLength(1);
     expect(
-      result.board.columns.find((col) => col.id === "BACKLOG")?.cards
+      result.board.columns.find((col) => col.id === "BACKLOG")?.tasks
     ).toHaveLength(0);
   });
 
@@ -40,23 +40,23 @@ describe("moveTask domain rules", () => {
 
     expect(result).toEqual({
       ok: false,
-      reason: ErrorReasons.CardsCanOnlyMoveToAdjacentColumns,
+      reason: ErrorReasons.TasksCanOnlyMoveToAdjacentColumns,
     });
   });
 
-  it("limits DOING to two cards", () => {
+  it("limits DOING to two tasks", () => {
     const board = createBoard();
     const doing = board.columns.find((col) => col.id === "DOING");
     if (!doing) throw new Error("Missing DOING column");
-    doing.cards.push({ id: "c1", text: "First" }, { id: "c2", text: "Second" });
+    doing.tasks.push({ id: "c1", text: "First" }, { id: "c2", text: "Second" });
     const todo = board.columns.find((col) => col.id === "TODO");
     if (!todo) throw new Error("Missing TODO column");
-    todo.cards.push({ id: "c3", text: "Third" });
+    todo.tasks.push({ id: "c3", text: "Third" });
 
     const result = moveTask(board, "c3", "DOING");
     expect(result).toEqual({
       ok: false,
-      reason: ErrorReasons.DoingColumnCanOnlyContain2Cards,
+      reason: ErrorReasons.DoingColumnCanOnlyContain2tasks,
     });
   });
 
@@ -71,7 +71,7 @@ describe("moveTask domain rules", () => {
     expect(intoDone.ok).toBe(true);
     if (!intoDone.ok) return;
     expect(
-      intoDone.board.columns.find((col) => col.id === "DONE")?.cards[0].id
+      intoDone.board.columns.find((col) => col.id === "DONE")?.tasks[0].id
     ).toBe("card-1");
   });
 
@@ -80,7 +80,7 @@ describe("moveTask domain rules", () => {
     const result = moveTask(board, "card-1", "DOING");
     expect(result).toEqual({
       ok: false,
-      reason: ErrorReasons.CardsInDoneCannotBeMoved,
+      reason: ErrorReasons.TasksInDoneCannotBeMoved,
     });
   });
 
