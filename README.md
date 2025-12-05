@@ -1,4 +1,4 @@
-# Task Board - Take Home Exercise
+# Task Board
 
 A Kanban-style board application built with React+Vite, TypeScript, Tailwind, Shadcn and DndKit.
 
